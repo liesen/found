@@ -36,17 +36,8 @@ main (int argc, char **argv)
       1,
       &kCFTypeArrayCallBacks);
 
-  struct predicate *pred = malloc(sizeof(struct predicate));
-  pred->func = &pred_and;
-  pred->name = "and";
-  pred->pred_left = malloc(sizeof(struct predicate));
-  pred->pred_left->func = &pred_iname;
-  pred->pred_left->name = "iname";
-  pred->pred_left->arg = "*.h";
-  pred->pred_right = malloc(sizeof(struct predicate));
-  pred->pred_right->func = &pred_print;
-  pred->pred_right->name = "print";
-  pred->pred_right->arg = NULL;
+  struct predicate *pred = parse_args(argc, argv);
+  print_tree(stderr, pred, 0);
 
   FSEventStreamContext context = {
     .version = 0,

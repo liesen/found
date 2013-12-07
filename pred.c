@@ -8,7 +8,7 @@
 bool
 apply_pred(const char *path, struct predicate *pred)
 {
-  return (pred->func)(path, pred);
+  return (pred->pred_func)(path, pred);
 }
 
 bool
@@ -20,6 +20,12 @@ pred_and(const char *path, struct predicate *pred)
     }
 
   return false;
+}
+
+bool
+pred_closeparen(const char *path, struct predicate *pred)
+{
+  return true;
 }
 
 bool
@@ -38,6 +44,12 @@ bool
 pred_name(const char *path, struct predicate *pred)
 {
   return fnmatch(pred->arg, basename((char *)path), 0) == 0;
+}
+
+bool
+pred_openparen(const char *path, struct predicate *pred)
+{
+  return true;
 }
 
 bool

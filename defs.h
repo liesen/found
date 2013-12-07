@@ -2,28 +2,67 @@
 #define INC_DEFS_H 1
 
 #include <stdbool.h>
+#include <stdio.h>
 
 struct predicate;
 
 typedef bool (*PRED_FUNC)(const char *path, struct predicate *pred);
 
-struct predicate {
-  PRED_FUNC func;
-  char *name;
+struct predicate
+{
+  PRED_FUNC pred_func;
+
+  char *pred_name;
+
+  /* Argument passed to the predicate. */
   char *arg;
 
+  /* Left and right predicates for binary operations.  The right predicate
+     is used as argument to unary operations. */
   struct predicate *pred_left;
   struct predicate *pred_right;
+
+  /* Pointer to the next predicate. */
+  struct predicate *pred_next;
 };
+
+/* parser.c */
+struct parser_table;
+
+typedef bool (*PARSE_FUNC)(const struct parser_table *p,
+    char *argv[], int *arg_ptr);
+
+struct parser_table
+{
+  char *parser_name;
+  PARSE_FUNC parser_func;
+  PRED_FUNC pred_func;
+};
+
+const struct parser_table *find_parser(char *search_name);
+bool parse_closeparen(const struct parser_table *entry, char **argv, int *arg_ptr);
+bool parse_negate(const struct parser_table *entry, char **argv, int *arg_ptr);
+bool parse_openparen(const struct parser_table *entry, char **argv, int *arg_ptr);
+bool parse_print(const struct parser_table *entry, char **argv, int *arg_ptr);
 
 /* pred.c */
 bool apply_pred(const char *path, struct predicate *pred);
 
 bool pred_and(const char *path, struct predicate *pred);
+bool pred_closeparen(const char *path, struct predicate *pred);
 bool pred_iname(const char *path, struct predicate *pred);
 bool pred_ipath(const char *path, struct predicate *pred);
 bool pred_name(const char *path, struct predicate *pred);
+bool pred_openparen(const char *path, struct predicate *pred);
 bool pred_path(const char *path, struct predicate *pred);
 bool pred_print(const char *path, struct predicate *pred);
+
+/* tree.c */
+struct predicate *parse_args(int argc, char *argv[]);
+struct predicate *new_pred(const struct parser_table *entry);
+
+/* debug.c */
+void print_predicate(FILE *fp, const struct predicate *pred);
+void print_tree(FILE *fp, const struct predicate *pred, int indent);
 
 #endif
