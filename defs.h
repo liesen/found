@@ -21,7 +21,8 @@ enum predicate_type
 enum predicate_precedence
 {
   NO_PREC,
-  AND_PREC
+  AND_PREC,
+  NEGATE_PREC
 };
 
 struct predicate
@@ -33,6 +34,10 @@ struct predicate
   enum predicate_type pred_type;
 
   enum predicate_precedence pred_prec;
+
+  bool no_default_print;
+
+  bool artificial;
 
   /* Argument passed to the predicate. */
   char *arg;

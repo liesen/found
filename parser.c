@@ -7,6 +7,8 @@ static bool parse_and(const struct parser_table *entry, char **argv, int *arg_pt
 
 static struct parser_table const parse_table[] =
 {
+  {"(", parse_openparen, pred_openparen},
+  {")", parse_closeparen, pred_closeparen},
   {"and", parse_and, pred_and},
   {"print", parse_print, pred_print},
   {0, 0, 0}
@@ -58,8 +60,27 @@ parse_and(const struct parser_table *entry, char **argv, int *arg_ptr)
 }
 
 bool
+parse_closeparen(const struct parser_table *entry, char **argv, int *arg_ptr)
+{
+  struct predicate *pred = new_pred(entry);
+  pred->pred_type = CLOSE_PAREN;
+  pred->pred_prec = NO_PREC;
+  return true;
+}
+
+bool
+parse_openparen(const struct parser_table *entry, char **argv, int *arg_ptr)
+{
+  struct predicate *pred = new_pred(entry);
+  pred->pred_type = OPEN_PAREN;
+  pred->pred_prec = NO_PREC;
+  return true;
+}
+
+bool
 parse_print(const struct parser_table *entry, char **argv, int *arg_ptr)
 {
-  insert_primary(entry);
+  struct predicate *pred = insert_primary(entry);
+  pred->no_default_print = true;
   return true;
 }

@@ -25,7 +25,7 @@ callback(
 }
 
 int
-main (int argc, char **argv)
+main(int argc, char **argv)
 {
   CFStringRef paths[1] = {
       CFStringCreateWithCString(NULL, argv[1], kCFStringEncodingUTF8)
@@ -37,7 +37,6 @@ main (int argc, char **argv)
       &kCFTypeArrayCallBacks);
 
   struct predicate *pred = parse_args(argc, argv);
-  print_tree(stderr, pred, 0);
 
   FSEventStreamContext context = {
     .version = 0,
