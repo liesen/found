@@ -3,8 +3,11 @@
 #include <stdbool.h>
 #include <string.h>
 
+static bool parse_and(const struct parser_table *entry, char **argv, int *arg_ptr);
+
 static struct parser_table const parse_table[] =
 {
+  {"and", parse_and, pred_and},
   {"print", parse_print, pred_print},
   {0, 0, 0}
 };
@@ -39,8 +42,19 @@ insert_primary(const struct parser_table *entry)
   struct predicate *pred = new_pred(entry);
   pred->pred_func = entry->pred_func;
   pred->pred_name = entry->parser_name;
+  pred->pred_type = PRIMARY_TYPE;
   pred->arg = NULL;
   return pred;
+}
+
+bool
+parse_and(const struct parser_table *entry, char **argv, int *arg_ptr)
+{
+  struct predicate *pred = new_pred(entry);
+  pred->pred_func = pred_and;
+  pred->pred_type = BI_OP;
+  pred->pred_prec = AND_PREC;
+  return true;
 }
 
 bool

@@ -6,8 +6,59 @@
 /* Root of the predicate expression. */
 static struct predicate *root_pred = NULL;
 
+/* Head of the predicate list. */
+static struct predicate *head_pred = NULL;
+
 /* The last predicate allocated. */
 static struct predicate *last_pred = NULL;
+
+struct predicate *
+parse_tree(struct predicate **input)
+{
+  struct predicate *next_pred = NULL;
+  struct predicate *this_pred = *input;
+
+  if (*input == NULL)
+    {
+      fprintf(stderr, "invalid expression\n");
+      exit(1);
+    }
+
+  switch ((*input)->pred_type)
+    {
+    case NO_TYPE:
+      fprintf(stderr, "invalid expression\n");
+      exit(1);
+      break;
+
+    case BI_OP:
+      fprintf(stderr, "invalid expression; you have used a binary operator `%s' with nothing before it.\n",
+              this_pred->pred_name);
+      exit(1);
+      break;
+
+    case PRIMARY_TYPE:
+      next_pred = *input;
+      *input = (*input)->pred_next;
+      break;
+
+    case UN_OP:
+      next_pred = *input;
+      *input = (*input)->pred_next;
+      next_pred->pred_right = parse_tree(input);
+      break;
+
+    default:
+      fprintf(stderr, "oops -- invalid expression type!\n");
+      exit(1);
+      break;
+    }
+
+  if (*input == NULL)
+    return next_pred;
+
+  return next_pred;
+}
 
 /* Parse the command line arguments. */
 struct predicate *
@@ -17,7 +68,7 @@ parse_args(int argc, char *argv[])
   char *pred_name;
   int i;
 
-  root_pred = NULL;
+  head_pred = NULL;
 
   /* Skip arguments until we have something that looks like an expression. */
   for (i = 1; i < argc && argv[i][0] != '-'; i++)
@@ -27,6 +78,7 @@ parse_args(int argc, char *argv[])
 
   while (i < argc)
     {
+      pred_name = argv[i];
       parse_entry = find_parser(pred_name);
 
       if (parse_entry == NULL)
@@ -41,8 +93,17 @@ parse_args(int argc, char *argv[])
       if (!(*(parse_entry->parser_func))(parse_entry, argv, &i))
         {
           /* Parser failed. */
-          fprintf(stderr, "parser failed\n");
-          exit(1);
+          if (argv[i])
+            {
+              fprintf(stderr, "invalid argument `%s' to `%s'\n",
+                      argv[i], pred_name);
+              exit(1);
+            }
+          else
+            {
+              fprintf(stderr, "missing argument to `%s'\n", pred_name);
+              exit(1);
+            }
         }
       else
         {
@@ -50,6 +111,7 @@ parse_args(int argc, char *argv[])
         }
     }
 
+  root_pred = parse_tree(&head_pred);
   return root_pred;
 }
 
@@ -58,10 +120,10 @@ new_pred(const struct parser_table *entry)
 {
   struct predicate *pred;
 
-  if (root_pred == NULL)
+  if (head_pred == NULL)
     {
-      root_pred = malloc(sizeof(struct predicate));
-      last_pred = root_pred;
+      head_pred = malloc(sizeof(struct predicate));
+      last_pred = head_pred;
     }
   else
     {
@@ -72,6 +134,8 @@ new_pred(const struct parser_table *entry)
 
   last_pred->pred_func = NULL;
   last_pred->pred_name = NULL;
+  last_pred->pred_type = NO_TYPE;
+  last_pred->pred_prec = NO_PREC;
   last_pred->arg = NULL;
   last_pred->pred_left = NULL;
   last_pred->pred_right = NULL;

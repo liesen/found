@@ -8,11 +8,31 @@ struct predicate;
 
 typedef bool (*PRED_FUNC)(const char *path, struct predicate *pred);
 
+enum predicate_type
+{
+  NO_TYPE,
+  PRIMARY_TYPE,
+  UN_OP,
+  BI_OP,
+  OPEN_PAREN,
+  CLOSE_PAREN
+};
+
+enum predicate_precedence
+{
+  NO_PREC,
+  AND_PREC
+};
+
 struct predicate
 {
   PRED_FUNC pred_func;
 
   char *pred_name;
+
+  enum predicate_type pred_type;
+
+  enum predicate_precedence pred_prec;
 
   /* Argument passed to the predicate. */
   char *arg;
