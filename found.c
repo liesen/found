@@ -40,9 +40,9 @@ main (int argc, char **argv)
   pred->func = &pred_and;
   pred->name = "and";
   pred->pred_left = malloc(sizeof(struct predicate));
-  pred->pred_left->func = &pred_path;
-  pred->pred_left->name = "path";
-  pred->pred_left->arg = "*.c";
+  pred->pred_left->func = &pred_iname;
+  pred->pred_left->name = "iname";
+  pred->pred_left->arg = "*.h";
   pred->pred_right = malloc(sizeof(struct predicate));
   pred->pred_right->func = &pred_print;
   pred->pred_right->name = "print";

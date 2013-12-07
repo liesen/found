@@ -20,8 +20,10 @@ struct predicate {
 bool apply_pred(const char *path, struct predicate *pred);
 
 bool pred_and(const char *path, struct predicate *pred);
+bool pred_iname(const char *path, struct predicate *pred);
+bool pred_ipath(const char *path, struct predicate *pred);
+bool pred_name(const char *path, struct predicate *pred);
 bool pred_path(const char *path, struct predicate *pred);
 bool pred_print(const char *path, struct predicate *pred);
-bool pred_ipath(const char *path, struct predicate *pred);
 
 #endif

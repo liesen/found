@@ -1,6 +1,7 @@
 #include "defs.h"
 
 #include <fnmatch.h>
+#include <libgen.h>
 #include <stdbool.h>
 #include <stdio.h>
 
@@ -22,9 +23,21 @@ pred_and(const char *path, struct predicate *pred)
 }
 
 bool
+pred_iname(const char *path, struct predicate *pred)
+{
+  return fnmatch(pred->arg, basename((char *)path), FNM_CASEFOLD) == 0;
+}
+
+bool
 pred_ipath(const char *path, struct predicate *pred)
 {
   return fnmatch(pred->arg, path, FNM_PATHNAME | FNM_CASEFOLD) == 0;
+}
+
+bool
+pred_name(const char *path, struct predicate *pred)
+{
+  return fnmatch(pred->arg, basename((char *)path), 0) == 0;
 }
 
 bool
