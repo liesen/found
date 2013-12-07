@@ -10,13 +10,14 @@ callback(
     const FSEventStreamEventFlags eventFlags[],
     const FSEventStreamEventId eventIds[])
 {
+  struct predicate *pred = clientCallBackInfo;
   int i;
 
   for (i = 0; i < numEvents; i++)
     {
       char *filename = ((char **)eventPaths)[i];
 
-      if (pred_print(filename) == 0)
+      if (apply_pred(filename, pred) == 0)
         {
           continue;
         }
@@ -34,9 +35,13 @@ main (int argc, char **argv)
       (void *) paths,
       1,
       &kCFTypeArrayCallBacks);
+  struct predicate *pred = malloc(sizeof(struct predicate));
+  pred->func = &pred_print;
+  pred->name = "print";
+  pred->arg = NULL;
   FSEventStreamContext context = {
     .version = 0,
-    .info = NULL,
+    .info = pred,
     .retain = NULL,
     .release = NULL,
     .copyDescription = NULL

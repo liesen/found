@@ -4,7 +4,13 @@
 #include <stdio.h>
 
 bool
-pred_print(const char *path)
+apply_pred(const char *path, struct predicate *pred)
+{
+  return (pred->func)(path, pred);
+}
+
+bool
+pred_print(const char *path, struct predicate *pred)
 {
   printf("%s\n", path);
   return true;
