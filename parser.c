@@ -4,12 +4,14 @@
 #include <string.h>
 
 static bool parse_and(const struct parser_table *entry, char **argv, int *arg_ptr);
+static bool parse_iname(const struct parser_table *entry, char **argv, int *arg_ptr);
 
 static struct parser_table const parse_table[] =
 {
   {"(", parse_openparen, pred_openparen},
   {")", parse_closeparen, pred_closeparen},
   {"and", parse_and, pred_and},
+  {"iname", parse_iname, pred_iname},
   {"print", parse_print, pred_print},
   {0, 0, 0}
 };
@@ -35,6 +37,20 @@ find_parser(char *search_name)
     }
 
   return NULL;
+}
+
+static bool
+collect_arg(char **argv, int *arg_ptr, const char **collected_arg)
+{
+  if ((argv == NULL) || (argv[*arg_ptr] == NULL))
+    {
+      *collected_arg = NULL;
+      return false;
+    }
+
+  *collected_arg = argv[*arg_ptr];
+  (*arg_ptr)++;
+  return true;
 }
 
 struct predicate *
@@ -66,6 +82,20 @@ parse_closeparen(const struct parser_table *entry, char **argv, int *arg_ptr)
   pred->pred_type = CLOSE_PAREN;
   pred->pred_prec = NO_PREC;
   return true;
+}
+
+static bool
+parse_iname(const struct parser_table *entry, char **argv, int *arg_ptr)
+{
+  const char *name;
+
+  if (collect_arg(argv, arg_ptr, &name))
+    {
+      new_primary_pred(entry, entry->pred_func, name);
+      return true;
+    }
+
+  return false;
 }
 
 bool

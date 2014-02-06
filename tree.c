@@ -276,3 +276,16 @@ new_pred(const struct parser_table *entry)
   last_pred->pred_next = NULL;
   return last_pred;
 }
+
+struct predicate *
+new_primary_pred (const struct parser_table *entry,
+                  PRED_FUNC pred_func,
+                  const char *arg)
+{
+  struct predicate *pred = new_pred(entry);
+  pred->pred_func = pred_func;
+  pred->pred_name = entry->parser_name;
+  pred->arg = arg;
+  pred->pred_type = PRIMARY_TYPE;
+  return pred;
+}
