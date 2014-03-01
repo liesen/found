@@ -15,9 +15,9 @@ callback(
 
   for (i = 0; i < numEvents; i++)
     {
-      char *filename = ((char **)eventPaths)[i];
+      char *path = ((char **)eventPaths)[i];
 
-      if (apply_pred(filename, pred) == 0)
+      if (apply_pred(path, eventFlags[i], pred) == 0)
         {
           continue;
         }

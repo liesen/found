@@ -6,8 +6,8 @@ print_predicate(FILE *fp, const struct predicate *pred)
 {
   fprintf(fp, "%s", pred->pred_name);
 
-  if (pred->arg)
-    fprintf(fp, " %s", pred->arg);
+  if (pred->args.str)
+    fprintf(fp, " %s", pred->args.str);
 
   fprintf(fp, "\n");
 }

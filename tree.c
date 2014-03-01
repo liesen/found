@@ -374,7 +374,7 @@ new_pred(const struct parser_table *entry)
   last_pred->pred_prec = NO_PREC;
   last_pred->no_default_print = false;
   last_pred->artificial = false;
-  last_pred->arg = NULL;
+  last_pred->args.str = NULL;
   last_pred->pred_left = NULL;
   last_pred->pred_right = NULL;
   last_pred->pred_next = NULL;

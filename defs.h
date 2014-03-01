@@ -6,7 +6,7 @@
 
 struct predicate;
 
-typedef bool (*PRED_FUNC)(const char *path, struct predicate *pred);
+typedef bool (*PRED_FUNC)(const char *path, int flags, struct predicate *pred);
 
 enum predicate_type
 {
@@ -41,7 +41,11 @@ struct predicate
   bool artificial;
 
   /* Argument passed to the predicate. */
-  char *arg;
+  union
+  {
+    const char *str;
+    int flags;
+  } args;
 
   /* Left and right predicates for binary operations.  The right predicate
      is used as argument to unary operations. */
@@ -67,25 +71,32 @@ struct parser_table
 
 const struct parser_table *find_parser(char *search_name);
 bool parse_closeparen(const struct parser_table *entry, char **argv, int *arg_ptr);
+bool parse_event(const struct parser_table *entry, char **argv, int *arg_ptr);
 bool parse_negate(const struct parser_table *entry, char **argv, int *arg_ptr);
 bool parse_openparen(const struct parser_table *entry, char **argv, int *arg_ptr);
 bool parse_print(const struct parser_table *entry, char **argv, int *arg_ptr);
+bool parse_type(const struct parser_table *entry, char **argv, int *arg_ptr);
+bool collect_arg(char **argv, int *arg_ptr, const char **collected_arg);
 
 /* pred.c */
-bool apply_pred(const char *path, struct predicate *pred);
+bool apply_pred(const char *path, int flags, struct predicate *pred);
 
-bool pred_and(const char *path, struct predicate *pred);
-bool pred_closeparen(const char *path, struct predicate *pred);
-bool pred_exit(const char *path, struct predicate *pred);
-bool pred_false(const char *path, struct predicate *pred);
-bool pred_iname(const char *path, struct predicate *pred);
-bool pred_ipath(const char *path, struct predicate *pred);
-bool pred_name(const char *path, struct predicate *pred);
-bool pred_openparen(const char *path, struct predicate *pred);
-bool pred_or(const char *path, struct predicate *pred);
-bool pred_path(const char *path, struct predicate *pred);
-bool pred_print(const char *path, struct predicate *pred);
-bool pred_true(const char *path, struct predicate *pred);
+bool pred_and(const char *path, int flags, struct predicate *pred);
+bool pred_closeparen(const char *path, int flags, struct predicate *pred);
+bool pred_exit(const char *path, int flags, struct predicate *pred);
+bool pred_event(const char *path, int flags, struct predicate *pred);
+bool pred_false(const char *path, int flags, struct predicate *pred);
+bool pred_iname(const char *path, int flags, struct predicate *pred);
+bool pred_ipath(const char *path, int flags, struct predicate *pred);
+bool pred_name(const char *path, int flags, struct predicate *pred);
+bool pred_openparen(const char *path, int flags, struct predicate *pred);
+bool pred_or(const char *path, int flags, struct predicate *pred);
+bool pred_path(const char *path, int flags, struct predicate *pred);
+bool pred_print(const char *path, int flags, struct predicate *pred);
+bool pred_true(const char *path, int flags, struct predicate *pred);
+bool pred_type(const char *path, int flags, struct predicate *pred);
+
+struct predicate * insert_primary(const struct parser_table *entry);
 
 /* tree.c */
 struct predicate *parse_args(int argc, char *argv[]);

@@ -15,12 +15,14 @@ static struct parser_table const parse_table[] =
   {"(", parse_openparen, pred_openparen},
   {")", parse_closeparen, pred_closeparen},
   {"and", parse_and, pred_and},
+  {"event", parse_event, pred_event},
   {"exit", parse_exit, pred_exit},
   {"false", parse_false, pred_false},
   {"iname", parse_iname, pred_iname},
   {"or", parse_or, pred_or},
   {"print", parse_print, pred_print},
   {"true", parse_true, pred_true},
+  {"type", parse_type, pred_type},
   {0, 0, 0}
 };
 
@@ -47,7 +49,7 @@ find_parser(char *search_name)
   return NULL;
 }
 
-static bool
+bool
 collect_arg(char **argv, int *arg_ptr, const char **collected_arg)
 {
   if ((argv == NULL) || (argv[*arg_ptr] == NULL))
@@ -66,7 +68,7 @@ insert_primary(const struct parser_table *entry)
 {
   assert(entry->pred_func != NULL);
   struct predicate *pred = new_primary_pred(entry);
-  pred->arg = NULL;
+  pred->args.str = NULL;
   return pred;
 }
 
@@ -110,7 +112,7 @@ parse_iname(const struct parser_table *entry, char **argv, int *arg_ptr)
   if (collect_arg(argv, arg_ptr, &name))
     {
       struct predicate *pred = insert_primary(entry);
-      pred->arg = name;
+      pred->args.str = name;
       return true;
     }
 
