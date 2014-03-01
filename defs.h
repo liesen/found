@@ -75,6 +75,7 @@ bool apply_pred(const char *path, struct predicate *pred);
 
 bool pred_and(const char *path, struct predicate *pred);
 bool pred_closeparen(const char *path, struct predicate *pred);
+bool pred_exit(const char *path, struct predicate *pred);
 bool pred_iname(const char *path, struct predicate *pred);
 bool pred_ipath(const char *path, struct predicate *pred);
 bool pred_name(const char *path, struct predicate *pred);

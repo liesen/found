@@ -4,6 +4,7 @@
 #include <string.h>
 
 static bool parse_and(const struct parser_table *entry, char **argv, int *arg_ptr);
+static bool parse_exit(const struct parser_table *entry, char **argv, int *arg_ptr);
 static bool parse_iname(const struct parser_table *entry, char **argv, int *arg_ptr);
 
 static struct parser_table const parse_table[] =
@@ -11,6 +12,7 @@ static struct parser_table const parse_table[] =
   {"(", parse_openparen, pred_openparen},
   {")", parse_closeparen, pred_closeparen},
   {"and", parse_and, pred_and},
+  {"exit", parse_exit, pred_exit},
   {"iname", parse_iname, pred_iname},
   {"print", parse_print, pred_print},
   {0, 0, 0}
@@ -77,6 +79,13 @@ parse_closeparen(const struct parser_table *entry, char **argv, int *arg_ptr)
   struct predicate *pred = new_pred(entry);
   pred->pred_type = CLOSE_PAREN;
   pred->pred_prec = NO_PREC;
+  return true;
+}
+
+bool
+parse_exit(const struct parser_table *entry, char **argv, int *arg_ptr)
+{
+  struct predicate *pred = insert_primary(entry);
   return true;
 }
 

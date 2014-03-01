@@ -4,6 +4,7 @@
 #include <libgen.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 bool
 apply_pred(const char *path, struct predicate *pred)
@@ -25,6 +26,13 @@ pred_and(const char *path, struct predicate *pred)
 bool
 pred_closeparen(const char *path, struct predicate *pred)
 {
+  return true;
+}
+
+bool
+pred_exit(const char *path, struct predicate *pred)
+{
+  exit(0);
   return true;
 }
 
