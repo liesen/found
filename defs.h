@@ -21,6 +21,7 @@ enum predicate_type
 enum predicate_precedence
 {
   NO_PREC,
+  OR_PREC,
   AND_PREC,
   NEGATE_PREC
 };
@@ -80,6 +81,7 @@ bool pred_iname(const char *path, struct predicate *pred);
 bool pred_ipath(const char *path, struct predicate *pred);
 bool pred_name(const char *path, struct predicate *pred);
 bool pred_openparen(const char *path, struct predicate *pred);
+bool pred_or(const char *path, struct predicate *pred);
 bool pred_path(const char *path, struct predicate *pred);
 bool pred_print(const char *path, struct predicate *pred);
 

@@ -61,6 +61,17 @@ pred_openparen(const char *path, struct predicate *pred)
 }
 
 bool
+pred_or(const char *path, struct predicate *pred)
+{
+  if (pred->pred_left == NULL || !apply_pred(path, pred->pred_left))
+    {
+      return apply_pred(path, pred->pred_right);
+    }
+
+  return true;
+}
+
+bool
 pred_path(const char *path, struct predicate *pred)
 {
   return fnmatch(pred->arg, path, FNM_PATHNAME) == 0;

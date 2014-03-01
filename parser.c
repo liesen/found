@@ -6,6 +6,7 @@
 static bool parse_and(const struct parser_table *entry, char **argv, int *arg_ptr);
 static bool parse_exit(const struct parser_table *entry, char **argv, int *arg_ptr);
 static bool parse_iname(const struct parser_table *entry, char **argv, int *arg_ptr);
+static bool parse_or(const struct parser_table *entry, char **argv, int *arg_ptr);
 
 static struct parser_table const parse_table[] =
 {
@@ -14,6 +15,7 @@ static struct parser_table const parse_table[] =
   {"and", parse_and, pred_and},
   {"exit", parse_exit, pred_exit},
   {"iname", parse_iname, pred_iname},
+  {"or", parse_or, pred_or},
   {"print", parse_print, pred_print},
   {0, 0, 0}
 };
@@ -110,6 +112,15 @@ parse_openparen(const struct parser_table *entry, char **argv, int *arg_ptr)
   struct predicate *pred = new_pred_chk_op(entry);
   pred->pred_type = OPEN_PAREN;
   pred->pred_prec = NO_PREC;
+  return true;
+}
+
+bool
+parse_or(const struct parser_table *entry, char **argv, int *arg_ptr)
+{
+  struct predicate *pred = new_pred(entry);
+  pred->pred_type = BI_OP;
+  pred->pred_prec = OR_PREC;
   return true;
 }
 
