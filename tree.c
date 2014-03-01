@@ -186,6 +186,40 @@ default_prints(struct predicate *pred)
   return true;
 }
 
+bool
+looks_like_expression (const char *arg, bool leading)
+{
+  switch (arg[0])
+  {
+    case '-':
+      if (arg[1])  /* "-foo" is an expression.  */
+        return true;
+      else
+        return false;  /* Just "-" is a filename. */
+      break;
+
+    case ')':
+    case ',':
+      if (arg[1])
+        return false;  /* )x and ,z are not expressions */
+      else
+        return !leading;  /* A leading ) or , is not either */
+
+      /* ( and ! are part of an expression, but (2 and !foo are
+       * filenames.
+       */
+    case '!':
+    case '(':
+      if (arg[1])
+        return false;
+      else
+        return true;
+
+    default:
+      return false;
+  }
+}
+
 /* Parse the command line arguments. */
 struct predicate *
 parse_args(int argc, char *argv[])
@@ -208,7 +242,7 @@ parse_args(int argc, char *argv[])
   head_pred->artificial = true;
 
   /* Skip arguments until we have something that looks like an expression. */
-  for (i = 1; i < argc && argv[i][0] != '-'; i++)
+  for (i = 1; i < argc && !looks_like_expression(argv[i], true); i++)
     {
       /* Do nothing. */ ;
     }
