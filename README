@@ -1,1 +1,5 @@
-Like `find` but for file changes.
+Like `find (1)` but for file changes.
+
+Evaluates an expression whenever the file system changes.
+
+Example: `found . -iname \*.c -exec make` (though `exec` doesn't work yet.)
