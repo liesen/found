@@ -1,5 +1,14 @@
-Like `find (1)` but for file changes.
+Evaluates an expression whenever the file system changes. The expression
+should work just like `find(1)` (with some modifications).
 
-Evaluates an expression whenever the file system changes.
+Examples:
 
-Example: `found . -iname \*.c -exec make` (though `exec` doesn't work yet.)
+  `found . -iname \*.c -exec make` (though `exec` doesn't work yet.)
+
+
+Based on `find` in GNU findutils (http://www.gnu.org/software/findutils/), and
+fswatch (https://github.com/alandipert/fswatch).
+
+Other tools, e.g. watchman (https://github.com/facebook/watchman) and
+Grunt (http://gruntjs.com/) can do the same thing and much more, but I find
+them to not be in the Unix spirit.
