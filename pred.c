@@ -37,6 +37,12 @@ pred_exit(const char *path, struct predicate *pred)
 }
 
 bool
+pred_false(const char *path, struct predicate *pred)
+{
+  return false;
+}
+
+bool
 pred_iname(const char *path, struct predicate *pred)
 {
   return fnmatch(pred->arg, basename((char *)path), FNM_CASEFOLD) == 0;
@@ -81,5 +87,11 @@ bool
 pred_print(const char *path, struct predicate *pred)
 {
   printf("%s\n", path);
+  return true;
+}
+
+bool
+pred_true(const char *path, struct predicate *pred)
+{
   return true;
 }

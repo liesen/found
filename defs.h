@@ -77,6 +77,7 @@ bool apply_pred(const char *path, struct predicate *pred);
 bool pred_and(const char *path, struct predicate *pred);
 bool pred_closeparen(const char *path, struct predicate *pred);
 bool pred_exit(const char *path, struct predicate *pred);
+bool pred_false(const char *path, struct predicate *pred);
 bool pred_iname(const char *path, struct predicate *pred);
 bool pred_ipath(const char *path, struct predicate *pred);
 bool pred_name(const char *path, struct predicate *pred);
@@ -84,6 +85,7 @@ bool pred_openparen(const char *path, struct predicate *pred);
 bool pred_or(const char *path, struct predicate *pred);
 bool pred_path(const char *path, struct predicate *pred);
 bool pred_print(const char *path, struct predicate *pred);
+bool pred_true(const char *path, struct predicate *pred);
 
 /* tree.c */
 struct predicate *parse_args(int argc, char *argv[]);
