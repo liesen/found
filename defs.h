@@ -85,7 +85,8 @@ bool pred_print(const char *path, struct predicate *pred);
 /* tree.c */
 struct predicate *parse_args(int argc, char *argv[]);
 struct predicate *new_pred(const struct parser_table *entry);
-struct predicate *new_primary_pred(const struct parser_table *entry, PRED_FUNC pred_func, const char *arg);
+struct predicate *new_pred_chk_op(const struct parser_table *entry);
+struct predicate *new_primary_pred(const struct parser_table *entry);
 
 /* debug.c */
 void print_predicate(FILE *fp, const struct predicate *pred);

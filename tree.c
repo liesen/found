@@ -42,6 +42,27 @@ parse_tree(struct predicate **input, enum predicate_precedence prev_prec,
       exit(1);
       break;
 
+    case CLOSE_PAREN:
+      if ((prev_pred->pred_type == UN_OP || prev_pred->pred_type == BI_OP)
+          && !this_pred->artificial)
+        {
+          fprintf(stderr, "expected an expression between '%s' and ')'",
+                  prev_pred->pred_name);
+          exit(1);
+        }
+      else if ((*input)->artificial)
+        {
+          fprintf(stderr, "expected an expression after '%s'",
+                  prev_pred->pred_name);
+          exit(1);
+        }
+      else
+        {
+          fprintf(stderr, "invalid expression: too many ')'");
+          exit(1);
+        }
+      break;
+
     case PRIMARY_TYPE:
       next_pred = *input;
       *input = (*input)->pred_next;
@@ -73,7 +94,7 @@ parse_tree(struct predicate **input, enum predicate_precedence prev_prec,
       next_pred = parse_tree(input, NO_PREC, prev_pred);
 
       if ((*input == NULL)
-          || ((*input)->pred_type == CLOSE_PAREN))
+          || ((*input)->pred_type != CLOSE_PAREN))
         {
           fprintf(stderr, "invalid expression; expected to find a `)' somewhere but didn't see one.\n");
           exit(1);
@@ -229,6 +250,11 @@ parse_args(int argc, char *argv[])
 
   if (head_pred->pred_next == NULL)
     {
+      temp_pred = head_pred;
+      head_pred = last_pred = head_pred->pred_next;
+      free(temp_pred);
+      parse_print(entry_print, argv, &argc);
+      last_pred->pred_name = "-print";
     }
   else if (!default_prints(head_pred->pred_next))
     {
@@ -240,11 +266,55 @@ parse_args(int argc, char *argv[])
     }
   else
     {
+      /* `( user-supplied-expression ) -print' */
+      /* Append artificial close-paren and print predicates */
+      parse_closeparen(entry_close, argv, &argc);
+      last_pred->pred_name = ")";
+      last_pred->artificial = true;
+      parse_print(entry_print, argv, &argc);
+      last_pred->pred_name = "-print";
+      last_pred->artificial = true;
     }
 
   temp_pred = head_pred;
   root_pred = parse_tree(&temp_pred, NO_PREC, NULL);
   return root_pred;
+}
+
+struct predicate *
+new_pred_chk_op(const struct parser_table *entry)
+{
+  struct predicate *pred;
+  static const struct parser_table *entry_and = NULL;
+
+  if (entry_and == NULL)
+    entry_and = find_parser("and");
+
+  if (last_pred != NULL)
+    switch (last_pred->pred_type)
+      {
+      case NO_TYPE:
+        fprintf(stderr, "oops -- invalid default insertion of and!\n");
+        exit(1);
+        break;
+
+      case PRIMARY_TYPE:
+      case CLOSE_PAREN:
+        pred = new_pred(entry_and);
+        pred->pred_func = pred_and;
+        pred->pred_name = "-a";
+        pred->pred_type = BI_OP;
+        pred->pred_prec = AND_PREC;
+        pred->no_default_print = false;
+        pred->artificial = true;
+        break;
+
+      default:
+        break;
+      }
+
+  pred = new_pred(entry);
+  return pred;
 }
 
 struct predicate *
@@ -264,7 +334,7 @@ new_pred(const struct parser_table *entry)
       last_pred = pred;
     }
 
-  last_pred->pred_func = NULL;
+  last_pred->pred_func = entry->pred_func;
   last_pred->pred_name = NULL;
   last_pred->pred_type = NO_TYPE;
   last_pred->pred_prec = NO_PREC;
@@ -278,14 +348,11 @@ new_pred(const struct parser_table *entry)
 }
 
 struct predicate *
-new_primary_pred (const struct parser_table *entry,
-                  PRED_FUNC pred_func,
-                  const char *arg)
+new_primary_pred (const struct parser_table *entry)
 {
-  struct predicate *pred = new_pred(entry);
-  pred->pred_func = pred_func;
+  struct predicate *pred = new_pred_chk_op(entry);
+  pred->pred_func = entry->pred_func;
   pred->pred_name = entry->parser_name;
-  pred->arg = arg;
   pred->pred_type = PRIMARY_TYPE;
   return pred;
 }

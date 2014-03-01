@@ -57,10 +57,7 @@ struct predicate *
 insert_primary(const struct parser_table *entry)
 {
   assert(entry->pred_func != NULL);
-  struct predicate *pred = new_pred(entry);
-  pred->pred_func = entry->pred_func;
-  pred->pred_name = entry->parser_name;
-  pred->pred_type = PRIMARY_TYPE;
+  struct predicate *pred = new_primary_pred(entry);
   pred->arg = NULL;
   return pred;
 }
@@ -69,7 +66,6 @@ bool
 parse_and(const struct parser_table *entry, char **argv, int *arg_ptr)
 {
   struct predicate *pred = new_pred(entry);
-  pred->pred_func = pred_and;
   pred->pred_type = BI_OP;
   pred->pred_prec = AND_PREC;
   return true;
@@ -91,7 +87,8 @@ parse_iname(const struct parser_table *entry, char **argv, int *arg_ptr)
 
   if (collect_arg(argv, arg_ptr, &name))
     {
-      new_primary_pred(entry, entry->pred_func, name);
+      struct predicate *pred = insert_primary(entry);
+      pred->arg = name;
       return true;
     }
 
@@ -101,7 +98,7 @@ parse_iname(const struct parser_table *entry, char **argv, int *arg_ptr)
 bool
 parse_openparen(const struct parser_table *entry, char **argv, int *arg_ptr)
 {
-  struct predicate *pred = new_pred(entry);
+  struct predicate *pred = new_pred_chk_op(entry);
   pred->pred_type = OPEN_PAREN;
   pred->pred_prec = NO_PREC;
   return true;
