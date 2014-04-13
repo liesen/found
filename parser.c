@@ -1,9 +1,11 @@
 #include "defs.h"
 #include <assert.h>
 #include <stdbool.h>
+#include <stdlib.h>
 #include <string.h>
 
 static bool parse_and(const struct parser_table *entry, char **argv, int *arg_ptr);
+static bool parse_exec(const struct parser_table *entry, char **argv, int *arg_ptr);
 static bool parse_exit(const struct parser_table *entry, char **argv, int *arg_ptr);
 static bool parse_false(const struct parser_table *entry, char **argv, int *arg_ptr);
 static bool parse_iname(const struct parser_table *entry, char **argv, int *arg_ptr);
@@ -16,6 +18,7 @@ static struct parser_table const parse_table[] =
   {")", parse_closeparen, pred_closeparen},
   {"and", parse_and, pred_and},
   {"event", parse_event, pred_event},
+  {"exec", parse_exec, pred_exec},
   {"exit", parse_exit, pred_exit},
   {"false", parse_false, pred_false},
   {"iname", parse_iname, pred_iname},
@@ -87,6 +90,48 @@ parse_closeparen(const struct parser_table *entry, char **argv, int *arg_ptr)
   struct predicate *pred = new_pred(entry);
   pred->pred_type = CLOSE_PAREN;
   pred->pred_prec = NO_PREC;
+  return true;
+}
+
+bool
+parse_exec(const struct parser_table *entry, char **argv, int *arg_ptr)
+{
+  struct predicate *pred = insert_primary(entry);
+  struct exec_val *execp = &pred->args.exec;
+  char *brace_arg;
+  int brace_count = 0;
+  int i = *arg_ptr, j;
+
+  for (j = i;
+       argv[j] != NULL && (argv[j][0] != ';' || argv[j][1] != '\0');
+       j++)
+    {
+      if (strstr(argv[j], "{}") != NULL)
+        {
+          brace_count++;
+          brace_arg = argv[j];
+        }
+    }
+
+  if (i == j || argv[j] == NULL)
+    {
+      *arg_ptr = j;
+      free(pred);
+      return false;
+    }
+
+  execp->argc = j - i;
+  execp->argv = &argv[i];
+
+  if (argv[j] == NULL)
+    {
+      *arg_ptr = j;
+    }
+  else
+    {
+      *arg_ptr = j + 1;
+    }
+
   return true;
 }
 

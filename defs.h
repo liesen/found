@@ -26,6 +26,13 @@ enum predicate_precedence
   NEGATE_PREC
 };
 
+struct exec_val
+{
+  int argc;
+  char **argv;
+  int last_child_status;
+};
+
 struct predicate
 {
   PRED_FUNC pred_func;
@@ -45,6 +52,7 @@ struct predicate
   {
     const char *str;
     int flags;
+    struct exec_val exec;
   } args;
 
   /* Left and right predicates for binary operations.  The right predicate
@@ -83,6 +91,7 @@ bool apply_pred(const char *path, int flags, struct predicate *pred);
 
 bool pred_and(const char *path, int flags, struct predicate *pred);
 bool pred_closeparen(const char *path, int flags, struct predicate *pred);
+bool pred_exec(const char *path, int flags, struct predicate *pred);
 bool pred_exit(const char *path, int flags, struct predicate *pred);
 bool pred_event(const char *path, int flags, struct predicate *pred);
 bool pred_false(const char *path, int flags, struct predicate *pred);

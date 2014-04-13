@@ -1,11 +1,17 @@
 #include "defs.h"
 
+#include <errno.h>
 #include <fnmatch.h>
 #include <libgen.h>
+#include <limits.h>
+#include <signal.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+
+static char *replace_str = "{}";
 
 bool
 apply_pred(const char *path, int flags, struct predicate *pred)
@@ -34,6 +40,107 @@ bool
 pred_event(const char *path, int flags, struct predicate *pred)
 {
   return (pred->args.flags & flags) != 0;
+}
+
+bool
+pred_exec(const char *path, int flags, struct predicate *pred)
+{
+  static char *buf;
+
+  if (buf == NULL)
+    {
+      size_t arg_max = sysconf(_SC_ARG_MAX);
+      buf = malloc(arg_max);
+    }
+
+  struct exec_val *execp = &pred->args.exec;
+  int argc = 0;
+  char **argv = malloc((execp->argc + 1) * sizeof (char *));
+  char *p = buf;
+
+  for (; argc < execp->argc; argc++)
+    {
+      argv[argc] = p;
+      char *arg = execp->argv[argc];
+      size_t arglen = strlen(arg);
+
+      do
+        {
+          size_t len;
+          char *s = strstr(arg, replace_str);
+
+          if (s)
+            {
+              len = s - arg;
+            }
+          else
+            {
+              len = arglen;
+            }
+
+          // Check length of buf
+
+          strncpy(p, arg, len);
+          p += len;
+          arg += len;
+          arglen -= len;
+
+          if (s)
+            {
+              strcpy(p, path);
+              p += strlen(path);
+              arg += strlen(replace_str);
+              arglen -= strlen(replace_str);
+            }
+        }
+      while (*arg);
+
+      if (*arg)
+        {
+          /* Command too long */
+          fprintf(stderr, "command too long");
+          exit(1);
+        }
+
+      *p++ = '\0';
+    }
+
+  argv[argc] = NULL;
+
+  fflush(stdout);
+  fflush(stderr);
+
+  pid_t child_pid = fork();
+
+  if (child_pid < 0)
+    {
+      fprintf(stderr, "cannot fork\n");
+      exit(1);
+    }
+
+  if (child_pid == 0)
+    {
+      execvp(argv[0], argv);
+      exit(1);
+    }
+
+  free(argv);
+
+  while (waitpid(child_pid, &(execp->last_child_status), 0) == (pid_t) -1)
+    {
+      if (errno != EINTR)
+        {
+          fprintf(stderr, "error waiting for %s\n", argv[0]);
+          return false;
+        }
+    }
+
+  if (WEXITSTATUS(execp->last_child_status) == 0)
+    {
+      return true;
+    }
+
+  return true;
 }
 
 bool
