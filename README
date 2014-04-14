@@ -3,12 +3,11 @@ should work just like `find(1)` (with some modifications).
 
 Examples:
 
-  `found . -iname \*.c -exec make` (though `exec` doesn't work yet.)
-
+  `found . -iname \*.c -exec make \;`
 
 Based on `find` in GNU findutils (http://www.gnu.org/software/findutils/), and
 fswatch (https://github.com/alandipert/fswatch).
 
 Other tools, e.g. watchman (https://github.com/facebook/watchman) and
 Grunt (http://gruntjs.com/) can do the same thing and much more, but I find
-them to not be in the Unix spirit.
+them to not be in very unixy.
