@@ -16,6 +16,16 @@ callback(
   for (i = 0; i < numEvents; i++)
     {
       char *path = ((char **)eventPaths)[i];
+      FSEventStreamEventFlags flags = eventFlags[i];
+
+      if ((flags & (kFSEventStreamEventFlagItemIsFile | kFSEventStreamEventFlagItemCreated | kFSEventStreamEventFlagItemRemoved)) != 0)
+        {
+          if ((flags & kFSEventStreamEventFlagItemModified) == 0)
+            {
+              // File is removed, created but not modified: skip it
+              continue;
+            }
+        }
 
       if (apply_pred(path, eventFlags[i], pred) == 0)
         {
